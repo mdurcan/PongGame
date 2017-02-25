@@ -1,0 +1,31 @@
+; Pong Game
+;//////////////////////////////////////////////////////
+;//////////////   main of BallUpdate    ///////////////
+;//////////////////////////////////////////////////////
+
+BallUpdate: 
+	CALL GetDir			; gets direction of the ball
+	JZ R6, Up			; if R6 is 0 then direction is up, so jumps to up. if not continues to down
+	
+	;Down
+	
+	
+	Up:
+	CALL CheckAngleP45	; checks if ball angle is +45
+	
+	
+RET
+;end of BallUpdate
+
+
+;//////////////////////////////////////////////////////
+;///////////////////	Functions	///////////////////
+;//////////////////////////////////////////////////////
+
+;Get Direction of the ball, 0 for up and 1 for down
+GetDir:
+	MOVRR R6, R0 	; move data to R4
+	SHRL R6, 15		; shift data to the right to get direction on its own
+RET					; returns the direction
+
+;Check that the Angle is +45
