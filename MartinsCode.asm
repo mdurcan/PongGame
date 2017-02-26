@@ -4,9 +4,9 @@
 ;//////////////////////////////////////////////////////
 
 BallUpdate: 
-	CALL GetDir					; gets direction of the ball
-	JZ R6 , Up					; if direction = up, jumps to up else cotinues to down
-	
+	CALL GetDir				; gets direction of the ball
+	JZ R6 , Up				; if direction = up, jumps to up else cotinues to down
+	; else
 	Down:
 		CALL GetAngle 			; get angle of ball, Angle in R5
 		CALL CheckAngleP45		; checks if ball angle is +45
@@ -14,40 +14,121 @@ BallUpdate:
 		CALL CheckAngleN45		; check if angle is -45
 		JZ R6, DownN45			; if angle = -45
 		;else angle =vertical
-		DownVertical:			; moving Down vertical
-			
+		DownVertical:		; moving Down vertical
+			CALL GetYLoc		; get YLoc
+			CALL CheckAtPaddle	; checks if at paddle
+			JZ R6, AtPaddle		; if yes jumps to AtPaddle
+			;else
 			MoveDown:			; move down
-				
+				MOVAMEMR R6, @R5	; gets the Ball from mem
+				MOVBAMEM @R5, R7	; clears the where the ball was
+				CALL DecYLoc		; decrements and saves YLoc
 			RET					
 			; end MoveDown
 			
-			PaddleVertical:		; moves vertical after hitting paddle
-				
-			; end PaddleVertical
+			AtPaddle:			; at paddle
+				CALL CheckPaddle		; checks if the paddle even there
+				JZ R6, LoseLife			; if it not there then jumps to lose life
+				CALL GetXLoc			; gets the xlocation
+				CALL CheckPaddleR		; checks if at right of paddle
+				JZ R6, PaddleN45		; if at right will jump to paddle -45
+				CALL CheckPaddleL		; checks if at left of paddle
+				JZ R6, PaddleP45		; if at left will jump to paddle +45
+				;else
+				PaddleVertical:			; moves vertical after hitting paddle
+					INVBR R0,0				; invert direction to Up
+					CALL AngleVertical		; angle = veritical
+				JZ R7, MoveUp
+				; end PaddleVertical
+			;end of AtPaddle
 		;end DownVertical
 		
 		DownP45:				; moving Down at +45
-		
+			CALL GetXLoc		; gets x location
+			CALL GetYLoc		; gets y location
+			CALL CheckAtBRCorner; checks if at bottom right corner
+			JZ R6, AtBRCorner	; if yes will jump to bottom right corner
+			CALL CheckAtPaddle	; checks if at paddle
+			JZ R6, AtPaddleP45	; if yes jumps to at paddle +45
+			CALL CheckAtRBorder	; checks if at right border 
+			JZ R6, AtRBorderP45	; if yes jumps to at right border
+			;else
 			MoveDownP45:		; move down at +45
-			
+				MOVAMEMR R6, @R5	; gets the Ball from mem
+				MOVBAMEM @R5, R7	; clears the where the ball was
+				CALL DecXLoc		; decrement and save XLoc
+				CALL DecYLoc		; decrements and saves YLoc
 			RET
 			; end MoveDownP45
 			
-			PaddleP45:			; moves at +45 after hitting paddle
-				
-			; end PaddleP45
+			AtBRCorner:			; at bottom right corner
+				CALL CheckPaddleR		; checks if at right of paddle
+				JNZ R6, LoseLife		; if paddle not there lose life
+				INVBR R0,0				; invert direction to Up
+			JZ R7,MoveUpP45		
+			
+			AtPaddleP45:		; at paddle
+				CALL CheckPaddle		; checks if the paddle even there
+				JZ R6, LoseLife			; if it not there then jumps to lose life
+				CALL CheckPaddleR		; checks if at right of paddle
+				JZ R6, PaddleVertical	; if at right will jump to paddle vertical
+				CALL CheckPaddleL		; checks if at left of paddle
+				JNZ R6, PaddleN45		; if it isnt at left will jump to paddle -45
+				;else
+				PaddleP45:			; moves at +45 after hitting paddle
+					INVBR R0,0				; invert direction to Up
+					CALL AngleP45			; angle = veritical
+				JZ R7, MoveUpP45
+				; end PaddleP45
+			;end of AtPaddleP45
+			
+			AtRBorderP45:
+				CALL AngleN45
+			JZ R7, MoveDownN45
 		;end DownP45
 		
 		DownN45:				; moving Down at -45
-		
+			CALL GetXLoc		; gets x location
+			CALL GetYLoc		; gets y location
+			CALL CheckAtBLCorner; checks if at bottom left corner
+			JZ R6, AtBLCorner	; if yes will jump to bottom left corner
+			CALL CheckAtPaddle	; checks if at paddle
+			JZ R6, AtPaddleN45	; if yes jumps to at paddle -45
+			CALL CheckAtLBorder	; checks if at left border 
+			JZ R6, AtRBorderN45	; if yes jumps to at left border
+			;else
 			MoveDownN45:		; move down at -45
-			
+				MOVAMEMR R6, @R5	; gets the Ball from mem
+				MOVBAMEM @R5, R7	; clears the where the ball was
+				CALL IncXLoc		; increment and save XLoc
+				CALL DecYLoc		; decrements and saves YLoc
 			RET
 			; end MoveDownN45
 			
-			PaddleP45:			; moves at -45 after hitting paddle
-				
-			; end PaddleN45
+			AtBLCorner:			; at bottom left corner
+				CALL CheckPaddleL		; checks if at left of paddle
+				JNZ R6, LoseLife		; if paddle not there lose life
+				INVBR R0,0				; invert direction to Up
+			JZ R7,MoveUpN45	
+			
+			AtPaddleN45:
+				CALL CheckPaddle		; checks if the paddle even there
+				JZ R6, LoseLife			; if it not there then jumps to lose life
+				CALL CheckPaddleL		; checks if at left of paddle
+				JZ R6, PaddleVertical	; if at left will jump to paddle vertical
+				CALL CheckPaddleR		; checks if at right of paddle
+				JNZ R6, PaddleP45		; if it isnt at right will jump to paddle +45
+				;else
+				PaddleN45:				; moves at -45 after hitting paddle
+					INVBR R0,0				; invert direction to Up
+					CALL AngleN45			; angle = veritical
+				JZ R7, MoveUpN45
+				; end PaddleN45
+			;end of AtPaddleN45
+			
+			AtLBorderN45:
+				CALL AngleP45
+			JZ R7, MoveDownP45
 		;end DownP45
 	;end of Down
 	
@@ -65,9 +146,8 @@ BallUpdate:
 			;else 
 			MoveUp:				; move up
 				MOVAMEMR R6, @R5	; gets the Ball from mem
-				MOVBAMEM R7, @R7	; clears the where the ball was
+				MOVBAMEM @R5, R7	; clears the where the ball was
 				CALL IncYLoc		; increments and saves YLoc
-				MOVBAMEM R6, @R5	; saves ball new location
 			RET
 			
 			AtWall:
@@ -91,13 +171,11 @@ BallUpdate:
 			;else
 			MoveUpP45:			; move up at +45
 				MOVAMEMR R6, @R5	; gets the Ball from mem
-				MOVBAMEM R7, @R7	; clears the where the ball was
-				CALL IncYLoc		; increments and saves YLoc
+				MOVBAMEM @R5, R7	; clears the where the ball was
 				CALL IncXLoc		; increment and save XLoc
-				SHLL R6,1			; shifts the ball left
-				MOVBAMEM R6, @R5	; saves ball new location
+				CALL IncYLoc		; increments and saves YLoc
 			RET	
-			
+			; end MoveUpP45
 			AtTLCorner:			; at the top left corner
 				CALL ClrWall		; clear wall
 				INVBR R0,0			; invert direction to down
@@ -112,15 +190,42 @@ BallUpdate:
 			AtLBorderP45:		; at border
 				CALL AngleN45		; changes angle to -45
 			JZ R7, MoveUpN45	; jumps to move up at -45
-			; end MoveUpP45
 		; end UpP45
 		
 		UpN45:					; moving up at -45
-			
-			MoveUpN45:				; move up at -45
-			
+			CALL GetXLoc		; gets x location
+			CALL GetYLoc		; gets y location
+			CALL CheckAtTRCorner; checks if at top right corner
+			JZ R6, AtTRCorner	; if at corner jump to AtTRCorner
+			;else
+			CALL CheckAtWall	; checks if at wall
+			JZ R6, AtWallN45	; if at wall jump to AtWall
+			;else
+			CALL CheckAtRBorder	; checks if at right border
+			JZ R6, AtRBorderN45	; if at right border jump to AtRBorderN45
+			;else
+			MoveUpN45:			; move up at -45
+				MOVAMEMR R6, @R5	; gets the Ball from mem
+				MOVBAMEM @R5, R7	; clears the where the ball was
+				CALL DecXLoc		; increment and save XLoc
+				CALL IncYLoc		; increments and saves YLoc
 			RET
 			; end MoveUpN45
+			
+			AtTRCorner:			; at top right corner
+				CALL ClrWall		; clear wall
+				INVBR R0,0			; invert direction to down
+			JZ R7, MoveDownN45	; jumps to move down at -45
+			
+			AtWallN45:			; at wall
+				CALL ClrWall		; clear wall
+				INVBR R0,0			; invert direction to down
+				CALL AngleP45		; changes angle to +45
+			JZ R7, MoveDownP45	; move down at +45
+			
+			AtRBorderN45:		; at right border
+				CALL AngleP45		; changes angle to +45
+			JZ R7, MoveUpP45
 		;end UpN45
 	; end of Up
 ;end of BallUpdate
@@ -173,61 +278,69 @@ GetWall:
 RET							; returns the wall to R4
 	
 
+; Get Paddle Loc
+GetPaddleLoc:
+	MOVRR R5, R0			; move data to R5
+	SHLL R5, 8				; shift left and
+	SHRL R5, 12				; shift right to get Paddle location alone
+RET							; returns paddle location to R5
+
+	
 ;//////////////////    Actuator   //////////////////////
 
 
-; increment X location
+; increment X location & shifts ball left
 IncXLoc:
 	PUSH R1
 	MOVRR R1,R4				; use R1 to remove old value
 	SHLL R1,8				; shifts to location of XLoc in R0
 	XOR R0,R0,R1			; clears old value
-	INC R4					; increment XLoc
+	INC R4,R4				; increment XLoc
 	SHLL R4,8				; shift to Xloc
 	ADD R0, R0, R4			; Saves new XLoc value
-	SHRL R4,8				; shift back for other functions
+	SHLL R6,1				; shifts the ball left
 	POP R1
 RET
 
 
-; Decrement X location
+; Decrement X location & shifts ball right
 DecXLoc:
 	PUSH R1
 	MOVRR R1,R4				; use R1 to remove old value
 	SHLL R1,8				; shifts to location of XLoc in R0
 	XOR R0,R0,R1			; clears old value
-	DEC R4					; Decrement XLoc
+	DEC R4,R4					; Decrement XLoc
 	SHLL R4,8				; shift to Xloc
 	ADD R0, R0, R4			; Saves new XLoc value
-	SHRL R4,8				; shift back for other functions
+	SHRL R6,1				; shifts the ball right
 	POP R1
 RET
 
 
-; increment Y location
+; increment Y location & and saves the ball
 IncYLoc:
 	PUSH R1
 	MOVRR R1,R5				; use R1 to remove old value
 	SHLL R1,12				; shifts to location of YLoc in R0
 	XOR R0,R0,R1			; clears old value
-	INC R5					; increment YLoc
+	INC R5,R5				; increment YLoc
+	MOVBAMEM @R5, R6		; saves ball new location
 	SHLL R5,12				; shifts to location of YLoc in R0
 	ADD R0, R0, R5			; Saves new YLoc value
-	SHRL R5,12				; shift back for other functions
 	POP R1
 RET
 
 
-; Decrement Y location
+; Decrement Y location & and saves ball
 DecYLoc:
 	PUSH R1
 	MOVRR R1,R5				; use R1 to remove old value
 	SHLL R1,12				; shifts to location of YLoc in R0
 	XOR R0,R0,R1			; clears old value
-	DEC R5					; Decrement YLoc
+	DEC R5,R5				; Decrement YLoc
+	MOVBAMEM @R5, R6		; saves ball new location
 	SHLL R5,12				; shifts to location of YLoc in R0
 	ADD R0, R0, R5			; Saves new YLoc value
-	SHRL R5,12				; shift back for other functions
 	POP R1
 RET
 
@@ -368,6 +481,42 @@ CheckAtPaddle:
 	XOR R6, R1, R5			; compare both, R6=0000h if before paddle
 	POP R1
 RET							; returns the result to R6 
+
+
+; Check if paddle below
+; 	0 for no
+CheckPaddle:
+	PUSH R1
+	PUSH R2
+	MOVAMEMR R1, @R5		; gets ball
+	MOVRR R2, R5
+	DEC R2,R2				; gives y location of paddle
+	MOVAMEMR R2, @R2		; gets paddle
+	AND R6, R1, R2			; gets the bit below ball, if paddle there it will not be 0000h
+	POP R2
+	POP R1
+RET							;returns result to R6
+
+
+; Check if at Right of PaddleN45
+;	0 if yes
+CheckPaddleR:
+	PUSH R5
+	CALL GetPaddleLoc		; gets paddle location, which is also location of right
+	XOR R6,R4,R5			; compare both, R6 =0000h 
+	POP R5
+RET							;returns result to R6
+
+
+; Check if at left of paddle
+;	0 if yes
+CheckPaddleL:
+	PUSH R5
+	CALL GetPaddleLoc		; gets paddle location
+	ADDI R5,R5,4			; Add 4 to get left side of paddle location
+	XOR R6,R4,R5			; compare both, R6 =0000h 
+	POP R5
+RET							;returns result to R6
 
 
 ; Get location before wall
