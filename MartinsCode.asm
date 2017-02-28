@@ -151,7 +151,7 @@ BallUpdate:
 			RET
 			
 			AtWall:
-				CALL ClrWall		; clear wall
+				CALL ClrWallBit		; clear wall
 				INVBR R0,0			; invert direction to down
 			JZ R7, MoveDown		; jumps to move down
 			; end MoveUp
@@ -177,12 +177,12 @@ BallUpdate:
 			RET	
 			; end MoveUpP45
 			AtTLCorner:			; at the top left corner
-				CALL ClrWall		; clear wall
+				CALL ClrWallBit		; clear wall
 				INVBR R0,0			; invert direction to down
 			JZ R7, MoveDownP45	; jumps to move down at +45
 			
 			AtWallP45:			; at wall 
-				CALL ClrWall		; clear wall
+				CALL ClrWallBit		; clear wall
 				INVBR R0,0			; invert direction to down
 				CALL AngleN45		; changes angle to -45
 			JZ R7, MoveDownN45	; jumps to move down at -45
@@ -213,12 +213,12 @@ BallUpdate:
 			; end MoveUpN45
 			
 			AtTRCorner:			; at top right corner
-				CALL ClrWall		; clear wall
+				CALL ClrWallBit		; clear wall
 				INVBR R0,0			; invert direction to down
 			JZ R7, MoveDownN45	; jumps to move down at -45
 			
 			AtWallN45:			; at wall
-				CALL ClrWall		; clear wall
+				CALL ClrWallBit		; clear wall
 				INVBR R0,0			; invert direction to down
 				CALL AngleP45		; changes angle to +45
 			JZ R7, MoveDownP45	; move down at +45
@@ -291,57 +291,49 @@ RET							; returns paddle location to R5
 
 ; increment X location & shifts ball left
 IncXLoc:
-	PUSH R1
-	MOVRR R1,R4				; use R1 to remove old value
-	SHLL R1,8				; shifts to location of XLoc in R0
-	XOR R0,R0,R1			; clears old value
+	MOVRR R3,R4				; use R3 to remove old value
+	SHLL R3,8				; shifts to location of XLoc in R0
+	XOR R0,R0,R3			; clears old value
 	INC R4,R4				; increment XLoc
 	SHLL R4,8				; shift to Xloc
 	ADD R0, R0, R4			; Saves new XLoc value
 	SHLL R6,1				; shifts the ball left
-	POP R1
 RET
 
 
 ; Decrement X location & shifts ball right
 DecXLoc:
-	PUSH R1
-	MOVRR R1,R4				; use R1 to remove old value
-	SHLL R1,8				; shifts to location of XLoc in R0
-	XOR R0,R0,R1			; clears old value
+	MOVRR R3,R4				; use R3 to remove old value
+	SHLL R3,8				; shifts to location of XLoc in R0
+	XOR R0,R0,R3			; clears old value
 	DEC R4,R4					; Decrement XLoc
 	SHLL R4,8				; shift to Xloc
 	ADD R0, R0, R4			; Saves new XLoc value
 	SHRL R6,1				; shifts the ball right
-	POP R1
 RET
 
 
 ; increment Y location & and saves the ball
 IncYLoc:
-	PUSH R1
-	MOVRR R1,R5				; use R1 to remove old value
-	SHLL R1,12				; shifts to location of YLoc in R0
-	XOR R0,R0,R1			; clears old value
+	MOVRR R3,R5				; use R3 to remove old value
+	SHLL R3,12				; shifts to location of YLoc in R0
+	XOR R0,R0,R3			; clears old value
 	INC R5,R5				; increment YLoc
 	MOVBAMEM @R5, R6		; saves ball new location
 	SHLL R5,12				; shifts to location of YLoc in R0
 	ADD R0, R0, R5			; Saves new YLoc value
-	POP R1
 RET
 
 
 ; Decrement Y location & and saves ball
 DecYLoc:
-	PUSH R1
-	MOVRR R1,R5				; use R1 to remove old value
-	SHLL R1,12				; shifts to location of YLoc in R0
-	XOR R0,R0,R1			; clears old value
+	MOVRR R3,R5				; use R3 to remove old value
+	SHLL R3,12				; shifts to location of YLoc in R0
+	XOR R0,R0,R3			; clears old value
 	DEC R5,R5				; Decrement YLoc
 	MOVBAMEM @R5, R6		; saves ball new location
 	SHLL R5,12				; shifts to location of YLoc in R0
 	ADD R0, R0, R5			; Saves new YLoc value
-	POP R1
 RET
 
 
@@ -393,13 +385,11 @@ RET							; returns result to R6
 ; 	0 if yes and 1 for not
 ;	XLoc in R4 and YLoc in R5
 CheckAtTLCorner:
-	PUSH R1 				; PUSH R1 so that it can be used
 	XOR R6,R6,R6			; clear R6
-	CALL BeforeWallLoc		; makes R1 =000Ch to compare against YLoc
-	XOR R6,R1,R5			; Compare both, if th Y Location matchs then zero saved to R6
+	CALL BeforeWallLoc		; makes R3 =000Ch to compare against YLoc
+	XOR R6,R3,R5			; Compare both, if th Y Location matchs then zero saved to R6
 	CALL BeforeLBorderLoc	; makes 4h to compare with XLoc
-	XOR R6,R1,R4			; Compare both, if th X Location matchs then zero saved to R6
-	POP R1 					; get back R1
+	XOR R6,R3,R4			; Compare both, if th X Location matchs then zero saved to R6
 RET							; returns the result to R6
 
 
@@ -407,11 +397,9 @@ RET							; returns the result to R6
 ; 	0 if yes and 1 for not
 ;	XLoc in R4 and YLoc in R5
 CheckAtTRCorner:
-	PUSH R1 				; PUSH R1 so that it can be used
 	MOVRR R6,R4				; XLoc will be zero if at top right corner
-	CALL BeforeWallLoc   	; Makes R1 =000Ch to compare against YLoc
-	XOR R6,R1,R5			; Compare both, if th Y Location matchs then zero saved to R6
-	POP R1 					; get back R1
+	CALL BeforeWallLoc   	; Makes R3 =000Ch to compare against YLoc
+	XOR R6,R3,R5			; Compare both, if th Y Location matchs then zero saved to R6
 RET							; returns the result to R6 
 
 
@@ -419,14 +407,12 @@ RET							; returns the result to R6
 ; 	0 if yes and 1 for not
 ;	XLoc in R4 and YLoc in R5
 CheckAtBLCorner:
-	PUSH R1 				; PUSH R1 so that it can be used
-	XOR R1,R1,R1			; clear R1
+	XOR R3,R3,R3			; clear R3
 	XOR R6,R6,R6			; clear R6
-	SETBR R1,0	    		; makes R1 =0001h to compare against YLoc
-	XOR R6,R1,R5			; Compare both, if th Y Location matchs then zero saved to R6
-	CALL BeforeLBorderLoc	; makes R1=000Fh to compare with XLoc
-	XOR R6,R1,R4			; Compare both, if th X Location matchs then zero saved to R6
-	POP R1 					; get back R1
+	SETBR R3,0	    		; makes R3 =0001h to compare against YLoc
+	XOR R6,R3,R5			; Compare both, if th Y Location matchs then zero saved to R6
+	CALL BeforeLBorderLoc	; makes R3=000Fh to compare with XLoc
+	XOR R6,R3,R4			; Compare both, if th X Location matchs then zero saved to R6
 RET							; returns the result to R6
 
 
@@ -434,12 +420,10 @@ RET							; returns the result to R6
 ; 	0 if yes and 1 for not
 ;	XLoc in R4 and YLoc in R5
 CheckAtBRCorner:
-	PUSH R1 				; PUSH R1 so that it can be used
-	XOR R1,R1,R1			; clear R1
+	XOR R3,R3,R3			; clear R3
 	MOVRR R6,R4				; ADD R4 to R6 as it will be zero if at left corner
-	SETBR R1,0    			; makes R1 =0001h to compare against YLoc
-	XOR R6,R1,R5			; Compare both, if th Y Location matchs then zero saved to R6
-	POP R1 					; get back R1
+	SETBR R3,0    			; makes R3 =0001h to compare against YLoc
+	XOR R6,R3,R5			; Compare both, if th Y Location matchs then zero saved to R6
 RET							; returns the result to R6 
 
 
@@ -447,10 +431,8 @@ RET							; returns the result to R6
 ;	0 if yes else 1 for no
 ;	YLoc in R5
 CheckAtWall:
-	PUSH R1 				; PUSH R1 so that it can be used
-	CALL BeforeWallLoc 		; R1 = 000Ch
-	XOR R6,R1,R5			; compare both, to see if ball at wall
-	POP R1 					; get back R1
+	CALL BeforeWallLoc 		; R3 = 000Ch
+	XOR R6,R3,R5			; compare both, to see if ball at wall
 RET							; returns the result to R6 
 
 
@@ -458,10 +440,8 @@ RET							; returns the result to R6
 ;	0 if yes and 1 for no
 ;	XLoc in R4
 CheckAtLBorder:
-	PUSH R1					; push R1
-	CALL BeforeLBorderLoc	; R1 = 000Fh
-	XOR R6, R1,R4			; compare both, to see if at border
-	POP R1 					; get back R1
+	CALL BeforeLBorderLoc	; R3 = 000Fh
+	XOR R6, R3,R4			; compare both, to see if at border
 RET							; returns the result to R6 
 
 
@@ -476,68 +456,60 @@ RET							; returns the result to R6
 ;	0 for yes
 ;	YLoc at R5
 CheckAtPaddle:
-	PUSH R1			
-	SETBR R1,0				;R1 = 0001h(just before paddle)
-	XOR R6, R1, R5			; compare both, R6=0000h if before paddle
-	POP R1
+	SETBR R3,0				;R3 = 0001h(just before paddle)
+	XOR R6, R3, R5			; compare both, R6=0000h if before paddle
 RET							; returns the result to R6 
 
 
 ; Check if paddle below
 ; 	0 for no
 CheckPaddle:
-	PUSH R1
 	PUSH R2
-	MOVAMEMR R1, @R5		; gets ball
+	MOVAMEMR R3, @R5		; gets ball
 	MOVRR R2, R5
 	DEC R2,R2				; gives y location of paddle
 	MOVAMEMR R2, @R2		; gets paddle
-	AND R6, R1, R2			; gets the bit below ball, if paddle there it will not be 0000h
+	AND R6, R3, R2			; gets the bit below ball, if paddle there it will not be 0000h
 	POP R2
-	POP R1
 RET							;returns result to R6
 
 
 ; Check if at Right of PaddleN45
 ;	0 if yes
 CheckPaddleR:
-	PUSH R5
 	CALL GetPaddleLoc		; gets paddle location, which is also location of right
 	XOR R6,R4,R5			; compare both, R6 =0000h 
-	POP R5
 RET							;returns result to R6
 
 
 ; Check if at left of paddle
 ;	0 if yes
 CheckPaddleL:
-	PUSH R5
 	CALL GetPaddleLoc		; gets paddle location
 	ADDI R5,R5,4			; Add 4 to get left side of paddle location
 	XOR R6,R4,R5			; compare both, R6 =0000h 
-	POP R5
 RET							;returns result to R6
 
 
 ; Get location before wall
-;  returns R1=000Ch
+;  returns R3=000Ch
 BeforeWallLoc:
-	XOR R1,R1,R1			;CLEAR R1
-	ADDI R1,R1,6			;R1=0006h
-	ADDI R1,R1,6			;R1=000Ch
+	XOR R3,R3,R3			;CLEAR R3
+	ADDI R3,R3,6			;R3=0006h
+	ADDI R3,R3,6			;R3=000Ch
 RET
 
 ; Get location at left border
-;  returns R1=000Fh
+;  returns R3=000Fh
 BeforeLBorderLoc:
-	XOR R1,R1,R1			;CLEAR R1
-	ADDI R1,R1,7			;R1=0007h
-	SETBR R1,3				;R1=000Fh
+	XOR R3,R3,R3			;CLEAR R3
+	ADDI R3,R3,7			;R3=0007h
+	SETBR R3,3				;R3=000Fh
 RET
 
 ;///////////////////// TO DO ////////////////////
 
-ClrWall:
+ClrWallBit:
 RET
 
 LoseLife:
