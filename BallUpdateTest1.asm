@@ -1,58 +1,20 @@
-; ////////////////////////////////////////////////////~~~ Pong Game ~~~//////////////////////////////////////////////////
+;test ball update when at corners
 
+; main
+
+Main:
+	INV R0,R0
+	SHLL R0,8
+	CLRBR R0,13
+	CLRBR R0,12
+	CALL AngleP45
+	CALL BallUpdate
+END
+
+; Pong Game
 ;//////////////////////////////////////////////////////
-;///////////////////	Main	///////////////////////
+;//////////////   main of BallUpdate    ///////////////
 ;//////////////////////////////////////////////////////
-
-
-
-;//////////////////////////////////////////////////////
-;//////////////////	SetUp Game	///////////////////////
-;//////////////////////////////////////////////////////
-
-
-
-;//////////////////////////////////////////////////////
-;//////////////////	SetUp Timer	///////////////////////
-;//////////////////////////////////////////////////////
-
-
-
-;//////////////////////////////////////////////////////
-;//////////////	Interupt 1 secound	///////////////////
-;//////////////////////////////////////////////////////
-
-
-
-;//////////////////////////////////////////////////////
-;////////////////	Paddle Update	///////////////////
-;//////////////////////////////////////////////////////
-
-PaddleUpdate:
-	MOVSFRR R5,SFR5				;Import button value
-	CALL CheckRightButton		;Call CheckRightButton function 
-	JZ R6,RightButtonPressed	;Jump to RightButtonPressed if zero
-	CALL CheckLeftButton		;Call CheckLeftButton function
-	JZ R6, LeftButtonPressed	;Jump to LeftButtonPressed if zero
-RET
-	
-RightButtonPressed:
-	CALL CheckPaddleAtR			;Call CheckPaddleAtR to check if paddle is at right border
-	JZ R6,2						;Jump 2 lines if zero
-	CALL ShiftPaddleRight		;Else, Call ShiftPaddleRight
-RET
-	
-	
-LeftButtonPressed:
-	CALL CheckPaddleAtL			;Call CheckPaddleAtL to check if paddle is at left border
-	JZ R6,2						;Jump 2 lines if zero
-	CALL ShiftPaddleLeft		;Else, Call ShiftPaddleLeft
-RET
-
-;//////////////////////////////////////////////////////
-;/////////////////	Ball Update	 //////////////////////
-;//////////////////////////////////////////////////////
-
 
 BallUpdate: 
 	CALL GetDir				; gets direction of the ball
@@ -283,42 +245,7 @@ BallUpdate:
 
 
 ;//////////////////////////////////////////////////////
-;////////////////	Lose Life	///////////////////////
-;//////////////////////////////////////////////////////
-
-
-LoseLife:
-	XOR R4, R4, R4			;R4 = 0000h
-	XOR R3, R3, R3			;R3 = 0000h
-	ADDI R4, 7				;R4 = 0007h
-	ADDI R4, 7				;R4 = 000Eh
-	SETBR R4, 4				;R4 = 001Eh
-	MOVAMEMR R5, @R4		;R5 = life
-	INC R5					;Add lost life
-	MOVBAMEM @R4, R5		;Put amount of lost lives into memory
-	ADDI R3, R3, 3			;R3 = 0003h
-	XOR R6, R5, R3			;Check if all lives are lost
-	JNZ R6, 3				;If lives are still available, jump to end
-	CALL ClearLives			;Clear lives
-	CALL SetUpGame			;Set up a new game
-RET
-
-ClearLives:
-	XOR R4, R4, R4			;R4 = 0000h
-	ADDI R4, 7				;R4 = 0007h
-	ADDI R4, 7				;R4 = 000Eh
-	SETBR R4, 4				;R4 = 001Eh
-	MOVBAMEM @R4, R7		;Put amount of lost lives into memory
-RET
-
-;//////////////////////////////////////////////////////
-;/////////////////	Clear Wall	///////////////////////
-;//////////////////////////////////////////////////////
-
-
-
-;//////////////////////////////////////////////////////
-;/////////////////	Functions	///////////////////////
+;///////////////////	Functions	///////////////////
 ;//////////////////////////////////////////////////////
 
 ;//////////////////    Getters   //////////////////////
@@ -353,6 +280,16 @@ GetYLoc:
 	SHRL R5, 12				; shift right to get Y location alone
 RET							; return Y location to R5
 	
+	
+; Get Wall, outputs R4
+GetWall:
+	XOR R4,R4,R4			; clear R4
+	ADDI R4,R4,6  			; R4=0006h
+	ADDI R4,R4,7 			; R4=000Dh
+	SETBR R4,4				; R4=001Dh where wall is stored
+	MOVAMEMR R4, @R4		; moves wall to R4
+RET							; returns the wall to R4
+	
 
 ; Get Paddle Loc
 GetPaddleLoc:
@@ -361,6 +298,7 @@ GetPaddleLoc:
 	SHRL R5, 12				; shift right to get Paddle location alone
 RET							; returns paddle location to R5
 
+	
 ;//////////////////    Actuator   //////////////////////
 
 
@@ -435,7 +373,8 @@ AngleN45:
 	SETBR R0,2
 RET
 
-;//////////////////    Checks   //////////////////////	
+
+;//////////////////    Func   //////////////////////	
 	
 ; Check that the Angle is +45 (01)
 ;	if it returns all 0 then its +45. else not +45
@@ -581,48 +520,10 @@ BeforeLBorderLoc:
 	SETBR R3,3				;R3=000Fh
 RET
 
+;///////////////////// TO DO ////////////////////
 
-;///////////////// Paddle Functions //////////////////////////
-
-CheckPaddleAtR:
-	CALL GetPaddleLoc		;Call GetPaddleLoc for paddle location
-	XOR R4,R4,R4			;R4 = 0000h
-	ADDI R4,R4,5			;R4 = 0005h
-	ADDI R4,R4,6			;R4 = 000Bh
-	XOR R6,R4,R5			;R6 = R4 - R5
+ClrWallBit:
 RET
 
-CheckPaddleAtL:
-	CALL GetPaddleLoc		;Call GetPaddleLoc for paddle location
-	MOVRR R6,R5				;Move R5 to R6
-RET
-
-CheckRightButton:
-	XOR R4,R4,R4			;R4 = 0000h
-	SETBR R4,0				;R4 = 0001h
-	AND R6,R4,R5
-	XOR R6,R4,R6			;R6 = R4 - R5
-RET
-
-CheckLeftButton:
-	XOR R4,R4,R4			;R4 = 0000h
-	SETBR R4,1				;R4 = 0002h
-	AND R6,R4,R5
-	XOR R6,R4,R6			;R6 = R4 - R5
-RET
-
-ShiftPaddleRight:
-	XOR R4,R4,R4			;R4 = 0000h
-	SETBR R4,4				;R4 = 0010h
-	MOVAMEMR R5,@R4			;Put value from memory address in R4 to R5
-	SHRL R5,1				;Shift value in R5 right by 1
-	MOVBAMEM @R4,R5			;Put value in R5 to memory address in R4
-RET
-
-ShiftPaddleLeft:
-	XOR R4,R4,R4			;R4 = 0000h
-	SETBR R4,4				;R4 = 0010h
-	MOVAMEMR R5,@R4			;Put value from memory address in R4 to R5
-	SHLL R5,1				;Shift value in R5 left by 1
-	MOVBAMEM @R4,R5			;Put value in R5 to memory address in R4
+LoseLife:
 RET

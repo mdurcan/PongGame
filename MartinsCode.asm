@@ -230,6 +230,29 @@ BallUpdate:
 	; end of Up
 ;end of BallUpdate
 
+LoseLife:
+	XOR R4, R4, R4			;R4 = 0000h
+	XOR R3, R3, R3			;R3 = 0000h
+	ADDI R4, 7				;R4 = 0007h
+	ADDI R4, 7				;R4 = 000Eh
+	SETBR R4, 4				;R4 = 001Eh
+	MOVAMEMR R5, @R4		;R5 = life
+	INC R5					;Add lost life
+	MOVBAMEM @R4, R5		;Put amount of lost lives into memory
+	ADDI R3, R3, 3			;R3 = 0003h
+	XOR R6, R5, R3			;Check if all lives are lost
+	JNZ R6, 3				;If lives are still available, jump to end
+	CALL ClearLives			;Clear lives
+	CALL SetUpGame			;Set up a new game
+RET
+
+ClearLives:
+	XOR R4, R4, R4			;R4 = 0000h
+	ADDI R4, 7				;R4 = 0007h
+	ADDI R4, 7				;R4 = 000Eh
+	SETBR R4, 4				;R4 = 001Eh
+	MOVBAMEM @R4, R7		;Put amount of lost lives into memory
+RET
 
 ;//////////////////////////////////////////////////////
 ;///////////////////	Functions	///////////////////
@@ -512,5 +535,3 @@ RET
 ClrWallBit:
 RET
 
-LoseLife:
-RET
