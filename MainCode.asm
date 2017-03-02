@@ -98,7 +98,7 @@ RET
 ;//////////////////////////////////////////////////////
 ;//////////////	Interupt 1 secound	///////////////////
 ;//////////////////////////////////////////////////////
-ISR2: ORG 116
+ISR2:ORG 116
 	CALL PaddleUpdate		; Update the location of the paddle in memory
 	CALL BallUpdate			; Update location of ball in memory
 RETI
@@ -757,5 +757,3 @@ ShiftPaddleLeft:
 	SHLL R5,1				;Shift value in R5 left by 1
 	MOVBAMEM @R4,R5			;Put value in R5 to memory address in R4
 RET
-
-
