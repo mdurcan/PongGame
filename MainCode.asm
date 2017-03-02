@@ -417,6 +417,7 @@ SETBR R4, 0					; R4 = 001Dh (memory location of wall)
 MOVAMEMR R3, @R4			; R3 =  wall's state
 CALL GetYLoc				; Put ball's y location into R5,
 							; Use this location as location of ball in memory
+SETBR R5,4
 MOVAMEMR R5, @R5			; R5 = memory address contents of ball
 INV R5, R5					; Invert ball memory address contents
 AND R5, R3, R5				; R5 = updated wall state
@@ -596,7 +597,8 @@ CheckAtTLCorner:
 	CALL BeforeWallLoc		; makes R3 =000Ch to compare against YLoc
 	XOR R6,R3,R5			; Compare both, if th Y Location matchs then zero saved to R6
 	CALL BeforeLBorderLoc	; makes 4h to compare with XLoc
-	XOR R6,R3,R4			; Compare both, if th X Location matchs then zero saved to R6
+	XOR R3,R3,R4			; Compare both, if th X Location matchs then zero saved to R6
+	OR R6,R6,R3
 RET							; returns the result to R6
 
 
@@ -606,7 +608,8 @@ RET							; returns the result to R6
 CheckAtTRCorner:
 	MOVRR R6,R4				; XLoc will be zero if at top right corner
 	CALL BeforeWallLoc   	; Makes R3 =000Ch to compare against YLoc
-	XOR R6,R3,R5			; Compare both, if th Y Location matchs then zero saved to R6
+	XOR R3,R3,R5			; Compare both, if th Y Location matchs then zero saved to R6
+	OR R6,R6,R3
 RET							; returns the result to R6 
 
 
@@ -619,7 +622,8 @@ CheckAtBLCorner:
 	SETBR R3,0	    		; makes R3 =0001h to compare against YLoc
 	XOR R6,R3,R5			; Compare both, if th Y Location matchs then zero saved to R6
 	CALL BeforeLBorderLoc	; makes R3=000Fh to compare with XLoc
-	XOR R6,R3,R4			; Compare both, if th X Location matchs then zero saved to R6
+	XOR R3,R3,R4			; Compare both, if th X Location matchs then zero saved to R6
+	OR R6,R6,R3
 RET							; returns the result to R6
 
 
@@ -630,7 +634,8 @@ CheckAtBRCorner:
 	XOR R3,R3,R3			; clear R3
 	MOVRR R6,R4				; ADD R4 to R6 as it will be zero if at left corner
 	SETBR R3,0    			; makes R3 =0001h to compare against YLoc
-	XOR R6,R3,R5			; Compare both, if th Y Location matchs then zero saved to R6
+	XOR R3,R3,R5			; Compare both, if th Y Location matchs then zero saved to R6
+	OR R6,R6,R3
 RET							; returns the result to R6 
 
 
