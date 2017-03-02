@@ -672,9 +672,10 @@ RET							; returns the result to R6
 ; Check if paddle below
 ; 	0 for no
 CheckPaddle:
-	PUSH R2
-	MOVAMEMR R3, @R5		; gets ball
+	PUSH R2	
 	MOVRR R2, R5
+	SETBR R2, 4
+	MOVAMEMR R3, @R2		; gets ball
 	DEC R2,R2				; gives y location of paddle
 	MOVAMEMR R2, @R2		; gets paddle
 	AND R6, R3, R2			; gets the bit below ball, if paddle there it will not be 0000h
@@ -685,17 +686,23 @@ RET							;returns result to R6
 ; Check if at Right of PaddleN45
 ;	0 if yes
 CheckPaddleR:
+	PUSH R5
 	CALL GetPaddleLoc		; gets paddle location, which is also location of right
-	XOR R6,R4,R5			; compare both, R6 =0000h 
+	MOVRR R3,R4
+	ADDI R3,R3,2
+	XOR R6,R3,R5			; compare both, R6 =0000h 
+	POP R5
 RET							;returns result to R6
 
 
 ; Check if at left of paddle
 ;	0 if yes
 CheckPaddleL:
+	PUSH R5
 	CALL GetPaddleLoc		; gets paddle location
-	ADDI R5,R5,4			; Add 4 to get left side of paddle location
+	ADDI R5,R5,	2		; Add 2 to get left side of paddle location
 	XOR R6,R4,R5			; compare both, R6 =0000h 
+	POP R5
 RET							;returns result to R6
 
 
