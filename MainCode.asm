@@ -114,6 +114,7 @@ RETI
 
 PaddleUpdate:
 	MOVSFRR R5,SFR5				;Import button value
+	SHRL R5,8					; shifts over 8 to import button values alone
 	CALL CheckRightButton		;Call CheckRightButton function 
 	JZ R6,RightButtonPressed	;Jump to RightButtonPressed if zero
 	CALL CheckLeftButton		;Call CheckLeftButton function
@@ -155,8 +156,10 @@ BallUpdate:
 			JZ R6, AtPaddle		; if yes jumps to AtPaddle
 			;else
 			MoveDown:			; move down
-				MOVAMEMR R6, @R5	; gets the Ball from mem
-				MOVBAMEM @R5, R7	; clears the where the ball was
+				MOVRR R3,R5
+				SETBR R3,4			
+				MOVAMEMR R6, @R3	; gets the Ball from mem
+				MOVBAMEM @R3, R7	; clears the where the ball was
 				CALL DecYLoc		; decrements and saves YLoc
 			RET					
 			; end MoveDown
@@ -189,8 +192,10 @@ BallUpdate:
 			JZ R6, AtRBorderP45	; if yes jumps to at right border
 			;else
 			MoveDownP45:		; move down at +45
-				MOVAMEMR R6, @R5	; gets the Ball from mem
-				MOVBAMEM @R5, R7	; clears the where the ball was
+				MOVRR R3,R5
+				SETBR R3,4	
+				MOVAMEMR R6, @R3	; gets the Ball from mem
+				MOVBAMEM @R3, R7	; clears the where the ball was
 				CALL DecXLoc		; decrement and save XLoc
 				CALL DecYLoc		; decrements and saves YLoc
 			RET
@@ -233,8 +238,10 @@ BallUpdate:
 			JZ R6, AtRBorderN45	; if yes jumps to at left border
 			;else
 			MoveDownN45:		; move down at -45
-				MOVAMEMR R6, @R5	; gets the Ball from mem
-				MOVBAMEM @R5, R7	; clears the where the ball was
+				MOVRR R3,R5
+				SETBR R3,4	
+				MOVAMEMR R6, @R3	; gets the Ball from mem
+				MOVBAMEM @R3, R7	; clears the where the ball was
 				CALL IncXLoc		; increment and save XLoc
 				CALL DecYLoc		; decrements and saves YLoc
 			RET
@@ -280,8 +287,10 @@ BallUpdate:
 			JZ R6, AtWall		; if at wall jumps to AtWall 
 			;else 
 			MoveUp:				; move up
-				MOVAMEMR R6, @R5	; gets the Ball from mem
-				MOVBAMEM @R5, R7	; clears the where the ball was
+				MOVRR R3,R5
+				SETBR R3,4	
+				MOVAMEMR R6, @R3	; gets the Ball from mem
+				MOVBAMEM @R3, R7	; clears the where the ball was
 				CALL IncYLoc		; increments and saves YLoc
 			RET
 			
@@ -305,8 +314,10 @@ BallUpdate:
 			JZ R6, AtLBorderP45	; if at left border jump to AtLBorderP45
 			;else
 			MoveUpP45:			; move up at +45
-				MOVAMEMR R6, @R5	; gets the Ball from mem
-				MOVBAMEM @R5, R7	; clears the where the ball was
+				MOVRR R3,R5
+				SETBR R3,4	
+				MOVAMEMR R6, @R3	; gets the Ball from mem
+				MOVBAMEM @R3, R7	; clears the where the ball was
 				CALL IncXLoc		; increment and save XLoc
 				CALL IncYLoc		; increments and saves YLoc
 			RET	
@@ -340,8 +351,10 @@ BallUpdate:
 			JZ R6, AtRBorderN45	; if at right border jump to AtRBorderN45
 			;else
 			MoveUpN45:			; move up at -45
-				MOVAMEMR R6, @R5	; gets the Ball from mem
-				MOVBAMEM @R5, R7	; clears the where the ball was
+				MOVRR R3,R5
+				SETBR R3,4	
+				MOVAMEMR R6, @R3	; gets the Ball from mem
+				MOVBAMEM @R3, R7	; clears the where the ball was
 				CALL DecXLoc		; increment and save XLoc
 				CALL IncYLoc		; increments and saves YLoc
 			RET
@@ -480,7 +493,9 @@ IncYLoc:
 	SHLL R3,12				; shifts to location of YLoc in R0
 	XOR R0,R0,R3			; clears old value
 	INC R5,R5				; increment YLoc
-	MOVBAMEM @R5, R6		; saves ball new location
+	MOVRR R3,R5
+	SETBR R3,4	
+	MOVBAMEM @R3, R6		; saves ball new location
 	SHLL R5,12				; shifts to location of YLoc in R0
 	ADD R0, R0, R5			; Saves new YLoc value
 RET
@@ -492,7 +507,9 @@ DecYLoc:
 	SHLL R3,12				; shifts to location of YLoc in R0
 	XOR R0,R0,R3			; clears old value
 	DEC R5,R5				; Decrement YLoc
-	MOVBAMEM @R5, R6		; saves ball new location
+	MOVRR R3,R5
+	SETBR R3,4	
+	MOVBAMEM @R3, R6		; saves ball new location
 	SHLL R5,12				; shifts to location of YLoc in R0
 	ADD R0, R0, R5			; Saves new YLoc value
 RET
