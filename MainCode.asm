@@ -713,7 +713,7 @@ RET
 
 ;///////////////// Paddle Functions //////////////////////////
 
-CheckPaddleAtR:
+CheckPaddleAtL:
 	CALL GetPaddleLoc		;Call GetPaddleLoc for paddle location
 	XOR R4,R4,R4			;R4 = 0000h
 	ADDI R4,R4,5			;R4 = 0005h
@@ -721,7 +721,7 @@ CheckPaddleAtR:
 	XOR R6,R4,R5			;R6 = R4 - R5
 RET
 
-CheckPaddleAtL:
+CheckPaddleAtR:
 	CALL GetPaddleLoc		;Call GetPaddleLoc for paddle location
 	MOVRR R6,R5				;Move R5 to R6
 RET
