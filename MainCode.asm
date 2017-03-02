@@ -4,10 +4,7 @@
 ;///////////////////	Main	///////////////////////
 ;//////////////////////////////////////////////////////
 main: 
-CALL initPaddle				; setup paddle width and position in data memory
-CALL initBall				; allow user to specify ball starting position and direction
-CALL initWall				; set up the wall
-CALL setupTimer				; set up 1sec timer 
+	CALL SetUpGame
 END
 
 
@@ -104,7 +101,6 @@ RET
 ISR2:
 	CALL PaddleUpdate		; Update the location of the paddle in memory
 	CALL BallUpdate			; Update location of ball in memory
-	;CALL WallUpdate		; Yet to implement
 RETI
 
 
@@ -420,8 +416,9 @@ SETBR R4, 0					; R4 = 001Dh (memory location of wall)
 MOVAMEMR R3, @R4			; R3 =  wall's state
 CALL GetYLoc				; Put ball's y location into R5,
 							; Use this location as location of ball in memory
-MOVAMEMR R5, @R5			; R5 = memory address of ball
-XOR R5, R5, R3				; XOR the wall state with the ball location
+MOVAMEMR R5, @R5			; R5 = memory address contents of ball
+INV R5, R5					; Invert ball memory address contents
+AND R5, R3, R5				; R5 = updated wall state
 MOVBAMEM @R4, R5			; Update wall state
 RET
 
