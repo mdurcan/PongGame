@@ -663,6 +663,7 @@ RET							; returns the result to R6
 ;	0 for yes
 ;	YLoc at R5
 CheckAtPaddle:
+	XOR R3,R3,R3
 	SETBR R3,0				;R3 = 0001h(just before paddle)
 	XOR R6, R3, R5			; compare both, R6=0000h if before paddle
 RET							; returns the result to R6 
