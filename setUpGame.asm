@@ -8,7 +8,7 @@
 main: CALL initPaddle		; setup paddle width and position in data memory
 CALL initBall				; allow user to specify ball starting position and direction
 CALL initWall				; set up the wall
-;CALL setupTimer			; 
+CALL setupTimer				; set up 1sec timer 
 END
 
 initPaddle:
@@ -58,14 +58,30 @@ MOVBAMEM @R5, R4			; Move wall to memory
 RET
 
 setupTimer: 
+; Setup the LDVAL registers for the timers
+XOR R4, R4, R4	; R4 = 0000h
+INVBR R4, 15	; R4 = 8000h
+SHRA R4, 6		; R4 = FE00h
+SETBR R4, 7		; R4 = FE80h
+SETBR R4, 1		; R4 = FE82h
+MOVRSFR SFR2, R4	; SFR2 = FE82h
+MOVRSFR SFR7, R4	; SFR7 = FE82h
+
+XOR R4, R4, R4	; Set R4 back to 0000h
+SETBR R4, 11	; R4 = 0800h
+INV R4, R4		; R4 = F7FFh
+SHRL R4, 5		; R4 = 07BFh
+INVBR R4, 15	; R4 = 87BRh
+MOVRSFR SFR1, R4	; SFR1 = 87BRh
+MOVRSFR SFR6, R4	; SFR6 = 87BRh
+
 ; Enabling timers and interrupts
 SETBSFR SFR0, 5	; Enabling timer auto-reload
 SETBSFR SFR0, 3	; Enabling timer interrupt
 SETBSFR SFR0, 0	; Enabling global interrupts
 SETBSFR SFR0, 4	; Enabling timer
-
-
-
 RET
 
-
+ISR2:
+CALL setupTimer
+RETI
