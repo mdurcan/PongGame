@@ -96,6 +96,14 @@ RET
 
 
 ;//////////////////////////////////////////////////////
+;//////////////	Interupt 1 secound	///////////////////
+;//////////////////////////////////////////////////////
+ISR2: ORG 116
+	CALL PaddleUpdate		; Update the location of the paddle in memory
+	CALL BallUpdate			; Update location of ball in memory
+RETI
+
+;//////////////////////////////////////////////////////
 ;////////////////	Paddle Update	///////////////////
 ;//////////////////////////////////////////////////////
 
@@ -461,6 +469,26 @@ RET							; returns paddle location to R5
 ;//////////////////    Actuator   //////////////////////
 
 
+; increment paddle location
+IncPaddleLoc:
+	MOVRR R4, R5
+	SHLL R4,4
+	XOR R0,R0,R4
+	INC R5,R5
+	SHLL R5,4
+	ADD R0,R0,R5
+RET
+
+; increment paddle location
+DecPaddleLoc:
+	MOVRR R4, R5
+	SHLL R4,4
+	XOR R0,R0,R4
+	DEC R5,R5
+	SHLL R5,4
+	ADD R0,R0,R5
+RET
+
 ; increment X location & shifts ball left
 IncXLoc:
 	MOVRR R3,R4				; use R3 to remove old value
@@ -713,6 +741,7 @@ CheckLeftButton:
 RET
 
 ShiftPaddleRight:
+	CALL DecPaddleLoc		; decrement paddle location
 	XOR R4,R4,R4			;R4 = 0000h
 	SETBR R4,4				;R4 = 0010h
 	MOVAMEMR R5,@R4			;Put value from memory address in R4 to R5
@@ -721,6 +750,7 @@ ShiftPaddleRight:
 RET
 
 ShiftPaddleLeft:
+	CALL IncPaddleLoc
 	XOR R4,R4,R4			;R4 = 0000h
 	SETBR R4,4				;R4 = 0010h
 	MOVAMEMR R5,@R4			;Put value from memory address in R4 to R5
@@ -729,10 +759,3 @@ ShiftPaddleLeft:
 RET
 
 
-;//////////////////////////////////////////////////////
-;//////////////	Interupt 1 secound	///////////////////
-;//////////////////////////////////////////////////////
-ISR2: ORG 735
-	CALL PaddleUpdate		; Update the location of the paddle in memory
-	CALL BallUpdate			; Update location of ball in memory
-RETI

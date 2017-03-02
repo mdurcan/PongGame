@@ -354,6 +354,7 @@ DecYLoc:
 	SHLL R3,12				; shifts to location of YLoc in R0
 	XOR R0,R0,R3			; clears old value
 	DEC R5,R5				; Decrement YLoc
+	SETBR R5,4				; make
 	MOVBAMEM @R5, R6		; saves ball new location
 	SHLL R5,12				; shifts to location of YLoc in R0
 	ADD R0, R0, R5			; Saves new YLoc value
